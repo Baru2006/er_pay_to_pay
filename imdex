@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay-to-Pay - EasyRecharge MM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .brand-orange { color: #ff6600; }
+        .bg-brand-orange { background-color: #ff6600; }
+        .header {
+            background-color: #000000;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff6600;
+        }
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary {
+            background-color: #000000;
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #333;
+        }
+        .btn-primary:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .form-select, .form-input {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            transition: border-color 0.2s;
+            background-color: white;
+        }
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: #ff6600;
+            box-shadow: 0 0 0 2px #ffcbae;
+        }
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 50;
+        }
+        #toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">EasyRecharge<span class="brand-orange">MM</span></div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">Pay-to-Pay</h1>
+            <p class="text-gray-500">Send and receive money between payment services.</p>
+        </div>
+        
+        <form id="payForm">
+            <div class="card">
+                <div class="mb-4">
+                    <label class="block text-lg font-semibold text-gray-700">User ID</label>
+                    <p id="userId" class="text-xl font-bold brand-orange bg-gray-100 p-2 rounded-md text-center">Loading...</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="fromPayment" class="block text-md font-semibold text-gray-700 mb-2">From</label>
+                        <select id="fromPayment" name="fromPayment" class="form-select" required>
+                            <option value="">Select source</option>
+                            <option value="Wave">Wave</option>
+                            <option value="KBZPay">KBZPay</option>
+                            <option value="AYA">AYA</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="toPayment" class="block text-md font-semibold text-gray-700 mb-2">To</label>
+                        <select id="toPayment" name="toPayment" class="form-select" required>
+                            <option value="">Select destination</option>
+                            <option value="Wave">Wave</option>
+                            <option value="KBZPay">KBZPay</option>
+                            <option value="AYA">AYA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="amountSent" class="block text-md font-semibold text-gray-700 mb-2">Amount Sent</label>
+                        <input type="number" id="amountSent" name="amountSent" class="form-input" placeholder="e.g., 10000" min="1" required>
+                    </div>
+                    <div>
+                        <label class="block text-md font-semibold text-gray-700 mb-2">Amount to Receive</label>
+                        <p id="amountReceive" class="text-2xl font-bold brand-orange">0 MMK</p>
+                    </div>
+                </div>
+
+                 <div>
+                    <label for="transactionId" class="block text-md font-semibold text-gray-700 mb-2">Transaction ID</label>
+                    <input type="text" id="transactionId" name="transactionId" class="form-input" placeholder="Enter your payment transaction ID" required>
+                </div>
+
+            </div>
+            
+            <button type="submit" id="submitBtn" class="btn btn-primary w-full text-lg" disabled>
+                Submit Payment
+            </button>
+        </form>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+
+    <script>
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzL5T6X_Gq_Jd7eGgPz_6J5WJ3n8H-C7iN4F9T8bV1S5kYgR2d-T0b9aV/exec'; // Replace with your GAS URL
+        
+        const state = {
+            userId: null,
+        };
+
+        const userIdEl = document.getElementById('userId');
+        const amountSentInput = document.getElementById('amountSent');
+        const amountReceiveEl = document.getElementById('amountReceive');
+        const payForm = document.getElementById('payForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const formInputs = payForm.querySelectorAll('select, input');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            state.userId = urlParams.get('uid') || 'GUEST';
+            userIdEl.textContent = state.userId;
+            
+            amountSentInput.addEventListener('input', calculateReceiveAmount);
+            payForm.addEventListener('submit', handleFormSubmit);
+            
+            formInputs.forEach(input => {
+                input.addEventListener('input', checkFormValidity);
+            });
+        });
+
+        function calculateReceiveAmount() {
+            const sent = parseFloat(amountSentInput.value);
+            if (isNaN(sent) || sent <= 0) {
+                amountReceiveEl.textContent = '0 MMK';
+                return;
+            }
+
+            let receive;
+            if (sent >= 10000) {
+                receive = sent * 0.97; // 3% fee
+            } else {
+                receive = sent - 200; // 200 MMK flat fee
+            }
+            
+            // Added logic to prevent the received amount from going below zero.
+            receive = Math.max(0, receive);
+            
+            amountReceiveEl.textContent = `${Math.floor(receive).toLocaleString()} MMK`;
+        }
+        
+        function checkFormValidity() {
+            let isValid = true;
+            formInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                }
+            });
+            submitBtn.disabled = !isValid;
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            const sent = parseFloat(amountSentInput.value);
+            let receive = 0;
+            if (sent >= 10000) {
+                receive = sent * 0.97;
+            } else {
+                receive = sent - 200;
+            }
+
+            // Ensure the data sent to the backend also respects the non-negative rule.
+            receive = Math.max(0, receive);
+
+            const data = {
+                userId: state.userId,
+                fromPayment: document.getElementById('fromPayment').value,
+                toPayment: document.getElementById('toPayment').value,
+                amountSent: sent,
+                amountReceive: Math.floor(receive),
+                transactionId: document.getElementById('transactionId').value,
+            };
+
+            try {
+                 await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                showToast('Payment submitted successfully!');
+                payForm.reset();
+                amountReceiveEl.textContent = '0 MMK';
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Payment';
+                checkFormValidity();
+            }
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = type === 'error' ? 'bg-red-600' : 'bg-gray-800';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+
+</body>
+</html>
+
+
