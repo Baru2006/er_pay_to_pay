@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number Selection UI Viewer</title>
+<title>Number Selection Overlay Viewer</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -12,13 +12,14 @@
 [data-theme="dark"]{
   --bg:#1e1e1e; --text:#f0f0f0; --accent:#ff7b00; --border:#333; --shadow:rgba(0,0,0,0.5);
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;}
-.container{max-width:800px;margin:auto;}
+body{margin:0;padding:20px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+.container{max-width:900px;margin:auto;}
 h2{text-align:center;margin-bottom:16px;}
-.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:16px;}
-.num-btn{padding:8px;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:0.2s;}
-.num-btn.selected{background:var(--accent);color:#fff;}
-.num-btn:hover{opacity:0.85;}
+#imageContainer{position:relative;margin-bottom:16px;border:1px solid var(--border);}
+#imageContainer img{width:100%;display:block;}
+.overlay{position:absolute;border:2px solid var(--accent);border-radius:6px;pointer-events:none;}
+.num-btn-overlay{position:absolute;border-radius:6px;border:1px solid var(--accent);background:rgba(255,123,0,0.1);text-align:center;cursor:pointer;user-select:none;transition:0.2s;}
+.num-btn-overlay.selected{background:var(--accent);color:#fff;}
 .results-panel{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;justify-content:center;}
 .result-item{padding:6px 10px;border-radius:6px;background:var(--border);cursor:pointer;transition:0.2s;}
 .result-item:hover{background:var(--accent);color:#fff;}
@@ -29,15 +30,16 @@ button:hover{opacity:0.85;}
 </head>
 <body data-theme="light">
 <div class="container">
-<h2>Number Selection UI Viewer</h2>
+<h2>Number Selection Overlay Viewer</h2>
 
-<!-- Results panel -->
+<input type="file" id="imageUpload" accept="image/*">
+<div id="imageContainer"></div>
+
 <div class="results-panel" id="resultsPanel"></div>
 <button id="copyBtn">Copy All Selected Numbers</button>
 <button id="clearBtn">Clear Selection</button>
 <button id="themeBtn">Toggle Dark/Light</button>
 
-<!-- JSON display for attributes -->
 <div id="attributesPanel"></div>
 </div>
 
@@ -63,43 +65,76 @@ const screenJSON = {
   }
 };
 
-// Render number grid
+const imageContainer = document.getElementById("imageContainer");
 const resultsPanel = document.getElementById("resultsPanel");
-const gridSection = screenJSON.ui_sections.find(s=>s.type==="number_grid");
-gridSection.numbers.forEach(num=>{
-  const btn = document.createElement("button");
-  btn.textContent = num;
-  btn.className="num-btn";
-  btn.addEventListener("click",()=>{
-    const existing = resultsPanel.querySelector(`[data-num="${num}"]`);
-    if(existing){
-      existing.remove(); btn.classList.remove("selected");
-    } else {
-      const div = document.createElement("div");
-      div.textContent=num; div.className="result-item"; div.dataset.num=num;
-      resultsPanel.appendChild(div); btn.classList.add("selected");
-    }
-  });
-  resultsPanel.parentNode.insertBefore(btn,resultsPanel);
+
+// Handle image upload
+document.getElementById("imageUpload").addEventListener("change", function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    imageContainer.innerHTML = `<img id="uploadedImage" src="${evt.target.result}">`;
+    createOverlay();
+  };
+  reader.readAsDataURL(file);
 });
 
-// Copy all
+function createOverlay(){
+  const img = document.getElementById("uploadedImage");
+  img.onload = function(){
+    const rect = img.getBoundingClientRect();
+    const overlayWidth = img.width;
+    const overlayHeight = img.height;
+
+    // Example: overlay number grid on top-middle
+    const gridSection = screenJSON.ui_sections.find(s=>s.type==="number_grid");
+    const gridDiv = document.createElement("div");
+    gridDiv.style.position="absolute";
+    gridDiv.style.top="10%";
+    gridDiv.style.left="5%";
+    gridDiv.style.width="90%";
+    gridDiv.style.height="50%";
+    gridDiv.style.display="grid";
+    gridDiv.style.gridTemplateColumns="repeat(10,1fr)";
+    gridDiv.style.gridGap="4px";
+    overlayWidth>800?gridDiv.style.fontSize="14px":gridDiv.style.fontSize="12px";
+
+    gridSection.numbers.forEach(num=>{
+      const btn = document.createElement("div");
+      btn.textContent=num;
+      btn.className="num-btn-overlay";
+      btn.style.width="100%"; btn.style.height="100%"; btn.style.lineHeight="24px";
+      btn.addEventListener("click",()=>{
+        const existing = resultsPanel.querySelector(`[data-num="${num}"]`);
+        if(existing){existing.remove(); btn.classList.remove("selected");}
+        else {
+          const div = document.createElement("div");
+          div.textContent=num; div.className="result-item"; div.dataset.num=num;
+          resultsPanel.appendChild(div); btn.classList.add("selected");
+        }
+      });
+      gridDiv.appendChild(btn);
+    });
+    imageContainer.appendChild(gridDiv);
+  }
+}
+
+// Copy / Clear / Theme
 document.getElementById("copyBtn").addEventListener("click",()=>{
   const nums = Array.from(resultsPanel.children).map(d=>d.textContent).join(", ");
   navigator.clipboard.writeText(nums); alert("Copied: "+nums);
 });
-// Clear
 document.getElementById("clearBtn").addEventListener("click",()=>{
   resultsPanel.innerHTML="";
-  document.querySelectorAll(".num-btn").forEach(b=>b.classList.remove("selected"));
+  document.querySelectorAll(".num-btn-overlay").forEach(b=>b.classList.remove("selected"));
 });
-// Theme toggle
 document.getElementById("themeBtn").addEventListener("click",()=>{
-  const html = document.documentElement;
+  const html=document.documentElement;
   html.dataset.theme = html.dataset.theme==="light"?"dark":"light";
 });
 
-// Display attributes
+// Attributes panel
 const attrDiv = document.getElementById("attributesPanel");
 attrDiv.innerHTML=`<div class="section-title">Main Subject:</div><div>${screenJSON.main_subject}</div>`;
 attrDiv.innerHTML+=`<div class="section-title">Attributes:</div><pre>${JSON.stringify(screenJSON.attributes,null,2)}</pre>`;
