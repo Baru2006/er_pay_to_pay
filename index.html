@@ -3,107 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number Selector 00-99</title>
+<title>Number Selection UI Viewer</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#ffffff;
-  --text:#222;
-  --accent:#ff7b00;
-  --border:#e5e5e5;
-  --shadow:rgba(0,0,0,0.1);
+:root{
+  --bg:#fff; --text:#222; --accent:#ff7b00; --border:#e5e5e5; --shadow:rgba(0,0,0,0.1);
 }
-[data-theme="dark"] {
-  --bg:#1e1e1e;
-  --text:#f0f0f0;
-  --accent:#ff7b00;
-  --border:#333;
-  --shadow:rgba(0,0,0,0.5);
+[data-theme="dark"]{
+  --bg:#1e1e1e; --text:#f0f0f0; --accent:#ff7b00; --border:#333; --shadow:rgba(0,0,0,0.5);
 }
-body {
-  font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  margin:0;
-  padding:20px;
-}
-.container { max-width:600px; margin:auto; text-align:center; }
-.grid { display:grid; grid-template-columns:repeat(10,1fr); gap:4px; margin-bottom:16px; }
-.num-btn {
-  padding:8px; border-radius:6px; border:1px solid var(--border); cursor:pointer; transition:0.2s;
-}
-.num-btn.selected { background:var(--accent); color:#fff; }
-.num-btn:hover { opacity:0.85; }
-.results-panel { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:16px; }
-.result-item { padding:6px 10px; border-radius:6px; background:var(--border); cursor:pointer; transition:0.2s; }
-.result-item:hover { background:var(--accent); color:#fff; }
-button { padding:8px 12px; margin:4px; border:none; border-radius:6px; background:var(--accent); color:#fff; cursor:pointer; transition:0.2s; }
-button:hover { opacity:0.85; }
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;}
+.container{max-width:800px;margin:auto;}
+h2{text-align:center;margin-bottom:16px;}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:16px;}
+.num-btn{padding:8px;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:0.2s;}
+.num-btn.selected{background:var(--accent);color:#fff;}
+.num-btn:hover{opacity:0.85;}
+.results-panel{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;justify-content:center;}
+.result-item{padding:6px 10px;border-radius:6px;background:var(--border);cursor:pointer;transition:0.2s;}
+.result-item:hover{background:var(--accent);color:#fff;}
+button{padding:8px 12px;margin:4px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;transition:0.2s;}
+button:hover{opacity:0.85;}
+.section-title{font-weight:600;margin-top:20px;margin-bottom:8px;}
 </style>
 </head>
 <body data-theme="light">
 <div class="container">
-  <h2>Number Selector 00-99</h2>
-  <div class="grid" id="numberGrid"></div>
+<h2>Number Selection UI Viewer</h2>
 
-  <div class="results-panel" id="resultsPanel"></div>
+<!-- Results panel -->
+<div class="results-panel" id="resultsPanel"></div>
+<button id="copyBtn">Copy All Selected Numbers</button>
+<button id="clearBtn">Clear Selection</button>
+<button id="themeBtn">Toggle Dark/Light</button>
 
-  <div>
-    <button id="clearBtn">Clear All</button>
-    <button id="copyBtn">Copy All</button>
-    <button id="themeBtn">Toggle Dark/Light</button>
-  </div>
+<!-- JSON display for attributes -->
+<div id="attributesPanel"></div>
 </div>
 
 <script>
-// Generate 00-99 buttons
-const grid = document.getElementById("numberGrid");
-for(let i=0;i<100;i++){
-  const num = i.toString().padStart(2,'0');
+// Example JSON (replace with AI output)
+const screenJSON = {
+  "id": "screen_001",
+  "main_subject": "Mobile app screen for 2D number selection game (numbers 00-69)",
+  "attributes": {
+    "color_palette": ["White","Light Green","Blue","Gray","Black","Yellow/Gold"],
+    "style": "Mobile UI with flat design, buttons, input fields",
+    "pose_or_action": null,
+    "expression_or_emotion": null,
+    "background": "White background containing multiple UI components"
+  },
+  "ui_sections":[
+    {"id":"grid_001","type":"number_grid","description":"Number selection grid","position":"Top-middle","size":"Large","numbers":["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99"]}
+  ],
+  "visible_text":{
+    "timestamps":["11:51 AM","12:01 AM Section - 24 Oct 2025","ပိတ်ချိန် : 11:50 AM"],
+    "numbers":["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99"],
+    "other_texts":["လက်ကျန်ငွေ : KS 3,500","အဆ X85","ထိုးငွေ :","100","အမြန်ရွေးချယ်ရန်","အမှတ် :","စုစုပေါင်းထိုးငွေ :","0","ထိုးမည်"]
+  }
+};
+
+// Render number grid
+const resultsPanel = document.getElementById("resultsPanel");
+const gridSection = screenJSON.ui_sections.find(s=>s.type==="number_grid");
+gridSection.numbers.forEach(num=>{
   const btn = document.createElement("button");
   btn.textContent = num;
-  btn.className = "num-btn";
-  grid.appendChild(btn);
-}
-
-// Toggle selection logic
-const resultsPanel = document.getElementById("resultsPanel");
-document.querySelectorAll(".num-btn").forEach(btn=>{
+  btn.className="num-btn";
   btn.addEventListener("click",()=>{
-    const num = btn.textContent;
-    const selected = resultsPanel.querySelector(`[data-num="${num}"]`);
-    if(selected){
-      selected.remove();
-      btn.classList.remove("selected");
+    const existing = resultsPanel.querySelector(`[data-num="${num}"]`);
+    if(existing){
+      existing.remove(); btn.classList.remove("selected");
     } else {
       const div = document.createElement("div");
-      div.textContent = num;
-      div.className = "result-item";
-      div.dataset.num = num;
-      resultsPanel.appendChild(div);
-      btn.classList.add("selected");
+      div.textContent=num; div.className="result-item"; div.dataset.num=num;
+      resultsPanel.appendChild(div); btn.classList.add("selected");
     }
   });
+  resultsPanel.parentNode.insertBefore(btn,resultsPanel);
 });
 
-// Clear All
-document.getElementById("clearBtn").addEventListener("click",()=>{
-  resultsPanel.innerHTML = "";
-  document.querySelectorAll(".num-btn").forEach(b=>b.classList.remove("selected"));
-});
-
-// Copy All
+// Copy all
 document.getElementById("copyBtn").addEventListener("click",()=>{
   const nums = Array.from(resultsPanel.children).map(d=>d.textContent).join(", ");
-  navigator.clipboard.writeText(nums);
-  alert("Copied: " + nums);
+  navigator.clipboard.writeText(nums); alert("Copied: "+nums);
 });
-
-// Theme Toggle
+// Clear
+document.getElementById("clearBtn").addEventListener("click",()=>{
+  resultsPanel.innerHTML="";
+  document.querySelectorAll(".num-btn").forEach(b=>b.classList.remove("selected"));
+});
+// Theme toggle
 document.getElementById("themeBtn").addEventListener("click",()=>{
   const html = document.documentElement;
   html.dataset.theme = html.dataset.theme==="light"?"dark":"light";
 });
+
+// Display attributes
+const attrDiv = document.getElementById("attributesPanel");
+attrDiv.innerHTML=`<div class="section-title">Main Subject:</div><div>${screenJSON.main_subject}</div>`;
+attrDiv.innerHTML+=`<div class="section-title">Attributes:</div><pre>${JSON.stringify(screenJSON.attributes,null,2)}</pre>`;
+attrDiv.innerHTML+=`<div class="section-title">Visible Text:</div><pre>${JSON.stringify(screenJSON.visible_text,null,2)}</pre>`;
 </script>
 </body>
 </html>
