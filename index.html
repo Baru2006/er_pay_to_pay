@@ -3,124 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number Generator</title>
+<title>Number Selector 00-99</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #ffffff;
-    --text: #222222;
-    --accent: #ff7b00;
-    --border: #e5e5e5;
-    --shadow: rgba(0,0,0,0.1);
-  }
-  [data-theme="dark"] {
-    --bg: #1e1e1e;
-    --text: #f0f0f0;
-    --accent: #ff7b00;
-    --border: #333333;
-    --shadow: rgba(0,0,0,0.5);
-  }
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 20px;
-  }
-  .container { max-width: 400px; margin: auto; }
-  label { display:block; margin-bottom:8px; font-weight:600; }
-  input { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; margin-bottom:12px; }
-  button { padding:10px 16px; margin-right:8px; border:none; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; transition:0.2s; }
-  button:hover { opacity:0.85; }
-  .results-panel { margin-top:16px; display:flex; flex-wrap:wrap; gap:8px; }
-  .result-item { background:var(--border); padding:8px 12px; border-radius:6px; box-shadow:0 2px 4px var(--shadow); cursor:pointer; transition:0.2s; }
-  .result-item:hover { background:var(--accent); color:#fff; }
-  .buttons { margin-bottom:12px; }
-  .theme-toggle { margin-top:16px; }
+:root {
+  --bg:#ffffff;
+  --text:#222;
+  --accent:#ff7b00;
+  --border:#e5e5e5;
+  --shadow:rgba(0,0,0,0.1);
+}
+[data-theme="dark"] {
+  --bg:#1e1e1e;
+  --text:#f0f0f0;
+  --accent:#ff7b00;
+  --border:#333;
+  --shadow:rgba(0,0,0,0.5);
+}
+body {
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  margin:0;
+  padding:20px;
+}
+.container { max-width:600px; margin:auto; text-align:center; }
+.grid { display:grid; grid-template-columns:repeat(10,1fr); gap:4px; margin-bottom:16px; }
+.num-btn {
+  padding:8px; border-radius:6px; border:1px solid var(--border); cursor:pointer; transition:0.2s;
+}
+.num-btn.selected { background:var(--accent); color:#fff; }
+.num-btn:hover { opacity:0.85; }
+.results-panel { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:16px; }
+.result-item { padding:6px 10px; border-radius:6px; background:var(--border); cursor:pointer; transition:0.2s; }
+.result-item:hover { background:var(--accent); color:#fff; }
+button { padding:8px 12px; margin:4px; border:none; border-radius:6px; background:var(--accent); color:#fff; cursor:pointer; transition:0.2s; }
+button:hover { opacity:0.85; }
 </style>
 </head>
 <body data-theme="light">
 <div class="container">
-  <label for="numberInput">Type You Want Number</label>
-  <input type="text" id="numberInput" placeholder="e.g. 1all, 2s, 12r, po, nk">
+  <h2>Number Selector 00-99</h2>
+  <div class="grid" id="numberGrid"></div>
 
-  <div class="buttons">
-    <button id="resultsBtn">Results</button>
-    <button id="cancelBtn">Cancel</button>
-  </div>
+  <div class="results-panel" id="resultsPanel"></div>
 
-  <div id="resultsPanel" class="results-panel"></div>
-
-  <div class="theme-toggle">
+  <div>
+    <button id="clearBtn">Clear All</button>
+    <button id="copyBtn">Copy All</button>
     <button id="themeBtn">Toggle Dark/Light</button>
   </div>
 </div>
 
 <script>
-const poSet = ["05","16","27","38","49","50","61","72","83","94"];
-const nkSet = ["18","24","35","42","53","69","70","81","96","07"];
-
-function generateNumbers(input){
-  let result = [];
-  input = input.trim();
-
-  if(input.endsWith("all")){
-    const prefix = input[0]==="_" ? "" : input[0];
-    for(let i=0;i<=9;i++){ result.push(prefix+i); }
-
-  } else if(input.endsWith("s")){
-    const prefix = input[0]==="_" ? "_" : input[0];
-    result.push(prefix+prefix);
-
-  } else if(input.endsWith("f")){
-    const prefix = input[0];
-    for(let i=0;i<=9;i++){ result.push(i+prefix); }
-
-  } else if(input.endsWith("b")){
-    const prefix = input[0];
-    for(let i=0;i<=9;i++){ result.push(prefix+i); }
-
-  } else if(input === "po"){
-    result = poSet;
-
-  } else if(input === "nk"){
-    result = nkSet;
-
-  } else if(input.endsWith("r")){
-    const base = input.slice(0,-1);
-    if(/^\d{2}$/.test(base)){
-      const reversed = base[1]+base[0];
-      result.push(base, reversed);
-    } else {
-      result.push("Invalid r-pattern");
-    }
-
-  } else {
-    result.push("Invalid input");
-  }
-
-  return result;
+// Generate 00-99 buttons
+const grid = document.getElementById("numberGrid");
+for(let i=0;i<100;i++){
+  const num = i.toString().padStart(2,'0');
+  const btn = document.createElement("button");
+  btn.textContent = num;
+  btn.className = "num-btn";
+  grid.appendChild(btn);
 }
 
-// Results Button
-document.getElementById("resultsBtn").addEventListener("click",()=>{
-  const input = document.getElementById("numberInput").value;
-  const numbers = generateNumbers(input);
-  const panel = document.getElementById("resultsPanel");
-  panel.innerHTML = "";
-  numbers.forEach(n=>{
-    const div = document.createElement("div");
-    div.textContent = n;
-    div.className = "result-item";
-    div.addEventListener("click",()=>{ navigator.clipboard.writeText(n); alert("Copied: "+n); });
-    panel.appendChild(div);
+// Toggle selection logic
+const resultsPanel = document.getElementById("resultsPanel");
+document.querySelectorAll(".num-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const num = btn.textContent;
+    const selected = resultsPanel.querySelector(`[data-num="${num}"]`);
+    if(selected){
+      selected.remove();
+      btn.classList.remove("selected");
+    } else {
+      const div = document.createElement("div");
+      div.textContent = num;
+      div.className = "result-item";
+      div.dataset.num = num;
+      resultsPanel.appendChild(div);
+      btn.classList.add("selected");
+    }
   });
 });
 
-// Cancel Button
-document.getElementById("cancelBtn").addEventListener("click",()=>{
-  document.getElementById("numberInput").value = "";
-  document.getElementById("resultsPanel").innerHTML = "";
+// Clear All
+document.getElementById("clearBtn").addEventListener("click",()=>{
+  resultsPanel.innerHTML = "";
+  document.querySelectorAll(".num-btn").forEach(b=>b.classList.remove("selected"));
+});
+
+// Copy All
+document.getElementById("copyBtn").addEventListener("click",()=>{
+  const nums = Array.from(resultsPanel.children).map(d=>d.textContent).join(", ");
+  navigator.clipboard.writeText(nums);
+  alert("Copied: " + nums);
 });
 
 // Theme Toggle
